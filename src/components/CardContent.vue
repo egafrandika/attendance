@@ -1,6 +1,9 @@
 <template>
     <div class="flex flex-col max-w-[600px] max-sm:w-[350px] bg-blue-500 mx-auto text-center rounded-lg">
-        <h1 class="text-center py-5 font-bold">Camera Attendance</h1>
+        <div class="flex justify-between items-center px-5">
+            <h1 class="text-center py-5 font-bold">Camera Attendance</h1>
+            <p class="font-bold">Hi! {{ this.$route.query.username }}</p>
+        </div>
         <hr>
         <div>
             <camera 
@@ -10,8 +13,18 @@
             >
             </camera>
         </div>
-        <select v-model="selectedCamera" @change="changeCameraCam">
-            <option v-for="device in availableCameras" :key="device.deviceId" :value="device.deviceId">{{ device.label }}</option>
+        <select 
+            class="font-bold px-3 py-2"
+            v-model="selectedCamera" 
+            @change="changeCameraCam"
+        >
+            <option 
+                v-for="device in availableCameras" 
+                :key="device.deviceId" 
+                :value="device.deviceId"
+            >
+                {{ device.label }}
+            </option>
         </select>
         <hr>
         <div class="flex max-sm:flex-col items-center">
@@ -49,6 +62,7 @@
 <script>
 import {useGeolocation} from '@vueuse/core';
 import axios from 'axios';
+import { getDatabase, ref, push } from 'firebase/database';
 
 export default {
     name: 'CardComponent',
@@ -67,15 +81,12 @@ export default {
 
     mounted() {
         let cameras = this.$refs.cameraRef.devices(['videoinput']);
-        // this.selectedCamera = this.availableCameras[0]?.deviceId;
         cameras.then((result) => {
             this.availableCameras = result
             this.selectedCamera = result[0].deviceId
-            console.log(result)
         }).catch((err) => {
             console.log(err)
         });
-        console.log(this.availableCameras);
     },
 
     watch: {
@@ -157,6 +168,32 @@ export default {
                 } catch (error) {
                     console.error('Error change cam:', error);
                 }
+            }
+        },
+
+        sendAttend() {
+            const db = getDatabase();
+            const attendancesRef = ref(db, 'attendances/AllDataAttendance'); // Change 'attendances' to your desired Firebase path
+
+            const newAttendance = {
+                username: this.$route.query.username,
+                address: this.address,
+                formattedDate: this.formattedDate,
+                image: this.snapshotUrl
+            };
+
+        try {
+            // Push the new attendance data to Firebase
+            push(attendancesRef, newAttendance)
+                .then(() => {
+                    console.log('Attendance data sent successfully');
+                    // You can add any further actions here after sending the data
+                })
+                .catch((error) => {
+                    console.error('Error sending attendance data:', error);
+                });
+            } catch (error) {
+                console.error('Error sending attendance data:', error);
             }
         }
     }

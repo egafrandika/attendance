@@ -12,8 +12,8 @@ export default {
     name: 'HomePage',
 
     components: {
-    Navigation,
-    CardContent
+        Navigation,
+        CardContent
     }
 }
 </script>
