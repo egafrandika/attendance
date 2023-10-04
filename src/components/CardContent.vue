@@ -1,5 +1,5 @@
 <template>
-    <div class="flex flex-col max-w-[600px] bg-blue-500 mx-auto text-center rounded-lg">
+    <div class="flex flex-col max-w-[600px] max-sm:w-[350px] bg-blue-500 mx-auto text-center rounded-lg">
         <h1 class="text-center py-5 font-bold">Camera Attendance</h1>
         <hr>
         <div>
@@ -7,10 +7,14 @@
                 :resolution="{width: 375, heigh: 812}" 
                 autoplay 
                 ref="cameraRef"
-            ></camera>
+            >
+            </camera>
         </div>
+        <select v-model="selectedCamera" @change="changeCameraCam">
+            <option v-for="device in availableCameras" :key="device.deviceId" :value="device.deviceId">{{ device.label }}</option>
+        </select>
         <hr>
-        <div class="flex items-center">
+        <div class="flex max-sm:flex-col items-center">
             <div class="text-left pl-4 w-full py-4 flex flex-col">
                 <h1><span class="font-bold">DATE:</span> {{ formattedDate }}</h1>
                 <h1><span class="font-bold">LOCATION:</span> {{ address }}</h1>
@@ -21,7 +25,7 @@
                     :src="snapshotUrl" 
                     v-if="snapshotUrl"
                     alt="Snapshot" 
-                    width="300"
+                    width="320"
                 />
             </div>
         </div>
@@ -56,7 +60,22 @@ export default {
             geolocation: useGeolocation(),
             formattedDate: null,
             address: null,
+            selectedCamera: null, // to store the selected cam devices ID
+            availableCameras: [] // to store the list of avail cam
         }
+    },
+
+    mounted() {
+        let cameras = this.$refs.cameraRef.devices(['videoinput']);
+        // this.selectedCamera = this.availableCameras[0]?.deviceId;
+        cameras.then((result) => {
+            this.availableCameras = result
+            this.selectedCamera = result[0].deviceId
+            console.log(result)
+        }).catch((err) => {
+            console.log(err)
+        });
+        console.log(this.availableCameras);
     },
 
     watch: {
@@ -124,9 +143,20 @@ export default {
             } else {
                 console.error('Invalid response from the geocoding API.');
             }
-            
             } catch (error) {
                 console.error('Error fetching data from the geocoding API:', error);
+            }
+        },
+
+        async changeCameraCam() {
+            const camera = this.$refs.cameraRef;
+
+            if (camera && this.selectedCamera) {
+                try {
+                    await camera.changeCamera(this.selectedCamera);
+                } catch (error) {
+                    console.error('Error change cam:', error);
+                }
             }
         }
     }
