@@ -85,7 +85,7 @@ export default {
                     userData.username === this.formData.username &&
                     userData.password === this.formData.password
                 ) {
-                    this.$router.push({path:'/', query: { username: this.formData.username}}); 
+                    this.$router.push({path:'/home', query: { username: this.formData.username}}); 
                     return;
                 }
             }
