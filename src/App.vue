@@ -1,7 +1,7 @@
 <template>
   <notifications
     class="my-notification"
-    width="400"
+    width="200"
   />
   <div class="bg-global w-screen h-screen bg-cover">
     <RouterView />
