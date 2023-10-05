@@ -33,7 +33,7 @@
                         placeholder="*******"
                         v-model="formData.password"
                     >
-                    <p class="text-red-500 text-xs italic">Please choose a password.</p>
+                    <p class="text-red-500 text-xs italic">Masukan password dan username.</p>
                     </div>
                     <div class="flex items-center justify-between">
                     <button 
@@ -45,7 +45,7 @@
                     </button>
                     </div>
                 </form>
-                <p class="text-center text-gray-500 text-xs">
+                <p class="text-center text-white text-md">
                     Webcam Attendance
                 </p>
             </div>
