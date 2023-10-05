@@ -32,13 +32,13 @@
                 <h1><span class="font-bold">DATE:</span> {{ formattedDate }}</h1>
                 <h1><span class="font-bold">LOCATION:</span> {{ address }}</h1>
             </div>
-            <div class="flex px-4 py-4">
+            <div class="px-4 py-4 bg-origin-content">
                 <img 
-                    class="rounded-lg shadow-lg"
+                    class="rounded-lg shadow-lg object-cover"
                     :src="snapshotUrl" 
                     v-if="snapshotUrl"
-                    alt="Snapshot" 
-                    width="320"
+                    alt="Snapshot"
+                    width="360"
                 />
             </div>
         </div>
@@ -128,7 +128,7 @@ export default {
             const camera = this.$refs.cameraRef;
 
             if(camera) {
-                const blob = await camera.snapshot({width: 1920, height: 1080}, "image/png", 0.5);
+                const blob = await camera.snapshot({width: 1520, height: 1080}, "image/png", 0.5);
                 if(blob) {
                     this.snapshotUrl = URL.createObjectURL(blob);
                     this.timeAttend();
@@ -175,6 +175,16 @@ export default {
             const db = getDatabase();
             const attendancesRef = ref(db, 'attendances/AllDataAttendance'); // Change 'attendances' to your desired Firebase path
 
+            if(
+                !this.$route.query.username ||
+                !this.address ||
+                !this.formattedDate ||
+                !this.snapshotUrl
+            ) {
+                this.$notify({type: "warn", text: "Capture Terlebih Dahulu"});
+                return;
+            }
+
             const newAttendance = {
                 username: this.$route.query.username,
                 address: this.address,
@@ -186,11 +196,11 @@ export default {
             // Push the new attendance data to Firebase
             push(attendancesRef, newAttendance)
                 .then(() => {
-                    console.log('Attendance data sent successfully');
+                    this.$notify({type: "success" ,text: "Berhasil terkirim"})
                     // You can add any further actions here after sending the data
                 })
                 .catch((error) => {
-                    console.error('Error sending attendance data:', error);
+                    this.$notify({text: "Gagal mengirim data" ,error});
                 });
             } catch (error) {
                 console.error('Error sending attendance data:', error);

@@ -1,6 +1,6 @@
 <template>
     <main class="bg-global bg-cover">
-        <div class="flex justify-center h-screen w-screen items-center flex-col">
+        <div class="flex justify-center h-screen w-screen max-sm:w-[360px] max-sm:mx-auto items-center flex-col">
             <h1 class="text-white font-bold text-[40px] py-4">Login Attendance</h1>
             <div class="w-full max-w-[500px]">
                 <form class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
@@ -86,15 +86,16 @@ export default {
                     userData.password === this.formData.password
                 ) {
                     this.$router.push({path:'/home', query: { username: this.formData.username}}); 
+                    this.$notify({type: "success", text: "Login berhasil"})
                     return;
                 }
             }
-                console.log('Login Failed: Username or password is incorrect');
+                this.$notify({type: 'error', text: "Username or password salah"});
             } else {
-                console.log('No user data found');
+                this.$notify({type: "warn", text: "User tidak ditemukan"});
             }
             } catch (error) {
-                console.error('Error fetching data:', error);
+                this.$notify({text: 'Error 505', error});
             }
         },
     }
