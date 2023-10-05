@@ -63,12 +63,14 @@
 import {useGeolocation} from '@vueuse/core';
 import axios from 'axios';
 import { getDatabase, ref, push } from 'firebase/database';
+import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 export default {
     name: 'CardComponent',
 
     data() {
         return {
+            temporaryBlob: null,
             snapshotUrl: null,
             geolocationData: null,
             geolocation: useGeolocation(),
@@ -128,8 +130,9 @@ export default {
             const camera = this.$refs.cameraRef;
 
             if(camera) {
-                const blob = await camera.snapshot({width: 1520, height: 1080}, "image/png", 0.5);
+                const blob = await camera.snapshot({width: 360, height: 270}, "image/png", 0.1);
                 if(blob) {
+                    this.temporaryBlob = blob;
                     this.snapshotUrl = URL.createObjectURL(blob);
                     this.timeAttend();
                     this.getStreetName();
@@ -171,7 +174,7 @@ export default {
             }
         },
 
-        sendAttend() {
+        async sendAttend() {
             const db = getDatabase();
             const attendancesRef = ref(db, 'attendances/AllDataAttendance'); // Change 'attendances' to your desired Firebase path
 
@@ -185,25 +188,55 @@ export default {
                 return;
             }
 
-            const newAttendance = {
-                username: this.$route.query.username,
-                address: this.address,
-                formattedDate: this.formattedDate,
-                image: this.snapshotUrl
-            };
+            try {
+                const downloadURL = await this.submitImageFirebase();
 
-        try {
-            // Push the new attendance data to Firebase
-            push(attendancesRef, newAttendance)
-                .then(() => {
-                    this.$notify({type: "success" ,text: "Berhasil terkirim"})
-                    // You can add any further actions here after sending the data
-                })
-                .catch((error) => {
-                    this.$notify({text: "Gagal mengirim data" ,error});
-                });
+                const newAttendance = {
+                    username: this.$route.query.username,
+                    address: this.address,
+                    formattedDate: this.formattedDate,
+                    image: this.snapshotUrl,
+                    imageUrl: downloadURL
+                };
+
+                await push(attendancesRef, newAttendance);
+                
+                this.$notify({type: "success", text: "Berhasil terkirim"});
             } catch (error) {
-                console.error('Error sending attendance data:', error);
+                console.error('Error mengirim attendance data', error);
+                this.$notify({type: "error", text: "Gagal mengirim data"})
+            }
+        },
+
+        async submitImageFirebase() {
+            if(!this.temporaryBlob) {
+                console.error('No image to submit');
+                return;
+            }
+
+            try {
+                // Generate a unique filename, e.g., based on date and time
+                const currentDate = new Date();
+                const username = this.$route.query.username;
+                const formattedDate = currentDate.toISOString().split('T')[0];
+                const formattedTime = currentDate.toLocaleTimeString().replace(/[:\s]/g, '');
+                const fileName = `${username}_${formattedDate}_${formattedTime}.png`;
+
+                const storage = getStorage();
+                const fileStorageRef = storageRef(storage, 'imagesStorage/' + fileName);
+
+                // Upload the Blob to Firebase Storage
+                await uploadBytes(fileStorageRef, this.temporaryBlob);
+
+                // Get the download URL for the uploaded image
+                const downloadURL = await getDownloadURL(fileStorageRef);
+
+                // Optionally, you can save the downloadURL or perform other actions here
+
+                console.log('Image uploaded. Download URL:', downloadURL);
+                return downloadURL;
+            } catch (error) {
+                console.error('Error uploading image:', error);
             }
         }
     }
