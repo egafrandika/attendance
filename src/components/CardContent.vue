@@ -138,7 +138,7 @@ export default {
 
                 if (isAndroid || isIos) {
                     width = 270;
-                    height = 550;
+                    height = 350;
                 } else {
                     width = 360;
                     height = 270;
