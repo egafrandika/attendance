@@ -130,7 +130,21 @@ export default {
             const camera = this.$refs.cameraRef;
 
             if(camera) {
-                const blob = await camera.snapshot({width: 360, height: 270}, "image/png", 0.1);
+                let width, height;
+
+                const userAgent = navigator.userAgent.toLowerCase();
+                const isAndroid = userAgent.indexOf("android") > -1;
+                const isIos = userAgent.indexOf("iphone") > -1 || userAgent.indexOf("ipad") > -1;
+
+                if (isAndroid || isIos) {
+                    width = 500;
+                    height = 750;
+                } else {
+                    width = 360;
+                    height = 270;
+                }
+                const blob = await camera.snapshot({width, height}, "image/png", 0.1); //todo fix image resoluiton
+
                 if(blob) {
                     this.temporaryBlob = blob;
                     this.snapshotUrl = URL.createObjectURL(blob);
@@ -143,7 +157,7 @@ export default {
         timeAttend() {
             const currentDate = new Date();
             const options = {year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric'}
-            this.formattedDate = currentDate.toLocaleDateString('en-US', options)
+            this.formattedDate = currentDate.toLocaleDateString('en-US', options) //todo change indo timezone
         },
 
         async getStreetName() {
@@ -218,8 +232,13 @@ export default {
                 // Generate a unique filename, e.g., based on date and time
                 const currentDate = new Date();
                 const username = this.$route.query.username;
-                const formattedDate = currentDate.toISOString().split('T')[0];
-                const formattedTime = currentDate.toLocaleTimeString().replace(/[:\s]/g, '');
+                
+                const year = currentDate.getFullYear();
+                const month = (currentDate.getMonth() + 1).toString().padStart(2, '0'); // Add 1 because months are 0-based
+                const day = currentDate.getDate().toString().padStart(2, '0');
+                const formattedDate = `${year}-${month}-${day}`;
+
+                const formattedTime = currentDate.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }).replace(/[:\s]/g, '');
                 const fileName = `${username}_${formattedDate}_${formattedTime}.png`;
 
                 const storage = getStorage();
