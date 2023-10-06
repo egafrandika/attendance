@@ -14,7 +14,7 @@
             <button
                 @click="takeSnapshot"
                 class="py-2 px-8 bg-green-500 rounded-lg absolute bottom-2 translate-x-[-50%]"
-            >
+            >  
                 <h1 class="font-bold text-[14px]">Capture</h1>
             </button>
             </camera>
@@ -60,7 +60,7 @@
 </template>
 
 <script>
-import {identity, useGeolocation} from '@vueuse/core';
+import {useGeolocation} from '@vueuse/core';
 import axios from 'axios';
 import { getDatabase, ref, push } from 'firebase/database';
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
