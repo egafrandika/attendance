@@ -11,6 +11,12 @@
                 autoplay 
                 ref="cameraRef"
             >
+            <button
+                @click="takeSnapshot"
+                class="py-2 px-8 bg-green-500 rounded-lg absolute bottom-2 translate-x-[-50%]"
+            >
+                <h1 class="font-bold text-[14px]">Capture</h1>
+            </button>
             </camera>
         </div>
         <select 
@@ -44,14 +50,8 @@
         </div>
         <div class="pb-5 space-x-3">
             <button
-                @click="takeSnapshot"
-                class="py-2 px-8 bg-green-500 rounded-lg"
-            >
-                <h1 class="font-bold text-[14px]">Capture</h1>
-            </button>
-            <button
                 @click="sendAttend"
-                class="py-2 px-8 bg-blue-900 rounded-lg"
+                class="py-2 px-8 bg-blue-900 rounded-lg w-[50%]"
             >
                 <h1 class="font-bold text-[14px] text-white">Send Attend</h1>
             </button>
@@ -82,16 +82,26 @@ export default {
     },
 
     mounted() {
+        let isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        let isAndroid = /Android/.test(navigator.userAgent);
+
         let cameras = this.$refs.cameraRef.devices(['videoinput']);
         cameras.then((result) => {
-            this.availableCameras = result
-            if (result.length > 1) {
-                this.selectedCamera = result[1].deviceId;
-            } else {
-                this.selectedCamera = result[0].deviceId
+        this.availableCameras = result;
+
+  // Default to the front camera on iOS and Android
+        if (isIOS || isAndroid) {
+            for (const device of result) {
+                if (device.label.toLowerCase().includes('front')) {
+                    this.selectedCamera = device.deviceId;
+                    break;
+                }
             }
+        } else {
+            this.selectedCamera = result[0].deviceId;
+        }
         }).catch((err) => {
-            console.log(err)
+            console.log(err);
         });
     },
 
