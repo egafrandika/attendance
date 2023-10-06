@@ -60,7 +60,7 @@
 </template>
 
 <script>
-import {useGeolocation} from '@vueuse/core';
+import {identity, useGeolocation} from '@vueuse/core';
 import axios from 'axios';
 import { getDatabase, ref, push } from 'firebase/database';
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
@@ -85,7 +85,11 @@ export default {
         let cameras = this.$refs.cameraRef.devices(['videoinput']);
         cameras.then((result) => {
             this.availableCameras = result
-            this.selectedCamera = result[0].deviceId
+            if (result.length > 1) {
+                this.selectedCamera = result[1].deviceId;
+            } else {
+                this.selectedCamera = result[0].deviceId
+            }
         }).catch((err) => {
             console.log(err)
         });
@@ -137,7 +141,7 @@ export default {
                 const isIos = userAgent.indexOf("iphone") > -1 || userAgent.indexOf("ipad") > -1;
 
                 if (isAndroid || isIos) {
-                    width = 500;
+                    width = 570;
                     height = 750;
                 } else {
                     width = 360;
