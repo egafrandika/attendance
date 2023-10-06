@@ -51,7 +51,7 @@
         <div class="pb-5 space-x-3">
             <button
                 @click="sendAttend"
-                class="py-2 px-8 bg-blue-900 rounded-lg w-[50%]"
+                class="py-2 px-8 bg-blue-900 rounded-lg"
             >
                 <h1 class="font-bold text-[14px] text-white">Send Attend</h1>
             </button>
@@ -82,26 +82,12 @@ export default {
     },
 
     mounted() {
-        let isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-        let isAndroid = /Android/.test(navigator.userAgent);
-
         let cameras = this.$refs.cameraRef.devices(['videoinput']);
         cameras.then((result) => {
-        this.availableCameras = result;
-
-  // Default to the front camera on iOS and Android
-        if (isIOS || isAndroid) {
-            for (const device of result) {
-                if (device.label.toLowerCase().includes('front')) {
-                    this.selectedCamera = device.deviceId;
-                    break;
-                }
-            }
-        } else {
-            this.selectedCamera = result[0].deviceId;
-        }
+            this.availableCameras = result
+            this.selectedCamera = result[0].deviceId
         }).catch((err) => {
-            console.log(err);
+            console.log(err)
         });
     },
 
@@ -151,8 +137,8 @@ export default {
                 const isIos = userAgent.indexOf("iphone") > -1 || userAgent.indexOf("ipad") > -1;
 
                 if (isAndroid || isIos) {
-                    width = 570;
-                    height = 750;
+                    width = 270;
+                    height = 550;
                 } else {
                     width = 360;
                     height = 270;
